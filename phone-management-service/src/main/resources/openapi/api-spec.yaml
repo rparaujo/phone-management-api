@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: PhoneRecord API
+  description: API for managing Phone Records
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local server
+
+paths:
+  /phonerecords:
+    post:
+      summary: Create a PhoneRecord
+      description: Creates a new PhoneRecord with a name and phone number.
+      operationId: createPhoneRecord
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhoneRecordInput'
+      responses:
+        '201':
+          description: PhoneRecord created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneRecord'
+        '400':
+          description: Invalid input data
+
+    get:
+      summary: Get all PhoneRecords
+      description: Retrieve a paginated list of all PhoneRecords.
+      operationId: getAllPhoneRecords
+      parameters:
+        - name: page
+          in: query
+          description: The page number for pagination.
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: The number of PhoneRecords to return per page.
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: A list of PhoneRecords
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: Total number of PhoneRecords
+                  page:
+                    type: integer
+                    description: Current page number
+                  limit:
+                    type: integer
+                    description: Limit of PhoneRecords per page
+                  records:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhoneRecord'
+        '400':
+          description: Invalid query parameters
+
+  /phonerecords/{id}:
+    get:
+      summary: Get a PhoneRecord by ID
+      description: Retrieve a specific PhoneRecord by its ID.
+      operationId: getPhoneRecordById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the PhoneRecord
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A PhoneRecord object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneRecord'
+        '404':
+          description: PhoneRecord not found
+
+    put:
+      summary: Update a PhoneRecord by ID
+      description: Update a PhoneRecord's name or phone number.
+      operationId: updatePhoneRecordById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the PhoneRecord to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhoneRecordInput'
+      responses:
+        '200':
+          description: PhoneRecord updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneRecord'
+        '404':
+          description: PhoneRecord not found
+        '400':
+          description: Invalid input data
+
+    delete:
+      summary: Delete a PhoneRecord by ID
+      description: Delete a PhoneRecord with the given ID.
+      operationId: deletePhoneRecordById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the PhoneRecord to delete
+          schema:
+            type: string
+      responses:
+        '204':
+          description: PhoneRecord deleted successfully
+        '404':
+          description: PhoneRecord not found
+
+components:
+  schemas:
+    PhoneRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the PhoneRecord
+        name:
+          type: string
+          description: Name of the person
+        phone:
+          type: string
+          description: Phone number of the person
+      required:
+        - id
+        - name
+        - phone
+
+    PhoneRecordInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the person
+        phone:
+          type: string
+          description: Phone number of the person
+      required:
+        - name
+        - phone
