@@ -9,20 +9,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class PhoneManagementServiceGetByIdIT {
+public class PhoneManagementServiceDeleteByIdIT {
 
   @Autowired
   private MockMvc mockMvc;
@@ -42,13 +40,18 @@ public class PhoneManagementServiceGetByIdIT {
   }
 
   @Test
-  @DisplayName( "PhoneManagementService should return a PhoneRecord by ID" )
-  void testPhoneRecordServiceShouldReturnPhoneRecords() throws Exception {
+  @DisplayName( "PhoneManagementService should delete a PhoneRecord by ID" )
+  void testPhoneRecordServiceShouldDeleteAPhoneRecordById() throws Exception {
     int id = 1;
-    mockMvc.perform( get( "/api/v1/phonerecords/{id}", id )
-             .contentType( MediaType.APPLICATION_JSON ) )
-           .andExpect( status().isOk() )
-           .andExpect( jsonPath( "$.name" ).value( "John Doe" ) )
-           .andExpect( jsonPath( "$.phoneNumber" ).value( "123456789" ) );
+    mockMvc.perform( delete( "/api/v1/phonerecords/{id}", id ) )
+           .andExpect( status().isNoContent() );
+  }
+
+  @Test
+  @DisplayName( "PhoneManagementService should return 404 a when trying to delete a non existing PhoneRecord by ID" )
+  void testPhoneRecordServiceShouldReturn404WhenDeletingANonExistingPhoneRecord() throws Exception {
+    int id = 99999;
+    mockMvc.perform( delete( "/api/v1/phonerecords/{id}", id ) )
+           .andExpect( status().isNotFound() );
   }
 }

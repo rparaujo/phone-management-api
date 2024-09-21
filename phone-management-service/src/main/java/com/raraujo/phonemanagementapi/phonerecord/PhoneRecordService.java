@@ -14,7 +14,7 @@ public interface PhoneRecordService {
 
   void addPhoneRecord( PhoneRecord phoneRecord );
 
-  void deletePhoneRecord( Long phoneRecordId );
+  boolean deletePhoneRecord( Long phoneRecordId );
 
   void updatePhoneRecord( PhoneRecord phoneRecord );
 

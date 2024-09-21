@@ -41,10 +41,6 @@ public class PhoneManagementServiceIT {
         PhoneRecord.builder().name( "Adam Something" ).phoneNumber( "543216789" ).build()
       )
     );
-
-    // Optionally log the current state
-    List<PhoneRecord> records = phoneRecordService.getPhoneRecords();
-    System.out.println( "Current records: " + records );
   }
 
   @Test

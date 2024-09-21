@@ -35,8 +35,12 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
   }
 
   @Override
-  public void deletePhoneRecord( Long phoneRecordId ) {
-
+  public boolean deletePhoneRecord( Long phoneRecordId ) {
+    if ( !phoneRecordRepository.existsById( phoneRecordId ) ) {
+      return false;
+    }
+    phoneRecordRepository.deleteById( phoneRecordId );
+    return !phoneRecordRepository.existsById( phoneRecordId );
   }
 
   @Override
