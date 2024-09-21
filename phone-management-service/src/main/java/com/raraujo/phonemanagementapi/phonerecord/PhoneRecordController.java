@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,11 +37,11 @@ public class PhoneRecordController {
   }
 
   @PostMapping
-  public ResponseEntity<Void> addPhoneRecord( @RequestBody Map<String, String> phoneRecordMap ) {
+  public ResponseEntity<String> addPhoneRecord( @RequestBody Map<String, String> phoneRecordMap ) {
     ObjectMapper mapper = new ObjectMapper();
     PhoneRecord phoneRecord = mapper.convertValue( phoneRecordMap, PhoneRecord.class );
     return phoneRecordService.addPhoneRecord( phoneRecord ) ? ResponseEntity.status( HttpStatus.CREATED ).build()
-      : ResponseEntity.status( HttpStatus.BAD_REQUEST ).build();
+      : ResponseEntity.status( HttpStatus.BAD_REQUEST ).contentType( MediaType.APPLICATION_JSON ).body( "{\"error\":\"invalid phone number\"}" );
   }
 
 

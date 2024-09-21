@@ -57,7 +57,8 @@ public class PhoneManagementServiceIT {
     mockMvc.perform( post( "/api/v1/phonerecords" )
              .contentType( MediaType.APPLICATION_JSON )
              .content( "{\"name\":\"Fake User\", \"phoneNumber\":\"123456789\"}" ) )
-           .andExpect( status().isBadRequest() );
+           .andExpect( status().isBadRequest() )
+           .andExpect( jsonPath( "error" ).value( "invalid phone number" ) );
   }
 
   @Test
