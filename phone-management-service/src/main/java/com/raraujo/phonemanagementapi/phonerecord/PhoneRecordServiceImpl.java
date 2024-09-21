@@ -1,6 +1,7 @@
 package com.raraujo.phonemanagementapi.phonerecord;
 
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -9,11 +10,12 @@ import java.util.List;
 @Service
 public class PhoneRecordServiceImpl implements PhoneRecordService{
 
-    private final List<PhoneRecord> phoneRecords = new ArrayList<>();
+    @Autowired
+    private PhoneRecordRepository phoneRecordRepository;
 
     @Override
     public List<PhoneRecord> getPhoneRecords() {
-        return phoneRecords;
+        return phoneRecordRepository.findAll();
     }
 
     @Override
@@ -23,7 +25,8 @@ public class PhoneRecordServiceImpl implements PhoneRecordService{
 
     @Override
     public void addPhoneRecord(PhoneRecord phoneRecord) {
-        phoneRecords.add(phoneRecord);
+        // TODO: what if the insert fails? Error validation...
+        phoneRecordRepository.save(phoneRecord);
     }
 
     @Override
