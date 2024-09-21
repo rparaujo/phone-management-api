@@ -39,18 +39,18 @@ public class PhoneRecordController {
   public ResponseEntity<Void> addPhoneRecord( @RequestBody Map<String, String> phoneRecordMap ) {
     ObjectMapper mapper = new ObjectMapper();
     PhoneRecord phoneRecord = mapper.convertValue( phoneRecordMap, PhoneRecord.class );
-    phoneRecordService.addPhoneRecord( phoneRecord );
-
-    return ResponseEntity.status( HttpStatus.CREATED ).build();
+    return phoneRecordService.addPhoneRecord( phoneRecord ) ? ResponseEntity.status( HttpStatus.CREATED ).build()
+      : ResponseEntity.status( HttpStatus.BAD_REQUEST ).build();
   }
+
 
   @DeleteMapping( "/{id}" )
   public ResponseEntity<Void> deletePhoneRecord( @PathVariable Long id ) {
     boolean deleted = phoneRecordService.deletePhoneRecord( id );
     if ( deleted ) {
-      return ResponseEntity.noContent().build(); // HTTP 204 No Content
+      return ResponseEntity.noContent().build();
     } else {
-      return ResponseEntity.notFound().build(); // HTTP 404 Not Found
+      return ResponseEntity.notFound().build();
     }
   }
 }

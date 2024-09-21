@@ -12,7 +12,7 @@ public interface PhoneRecordService {
 
   void addPhoneRecords( List<PhoneRecord> phoneRecords );
 
-  void addPhoneRecord( PhoneRecord phoneRecord );
+  boolean addPhoneRecord( PhoneRecord phoneRecord );
 
   boolean deletePhoneRecord( Long phoneRecordId );
 

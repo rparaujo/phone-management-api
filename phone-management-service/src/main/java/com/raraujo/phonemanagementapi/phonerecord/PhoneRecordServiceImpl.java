@@ -1,8 +1,11 @@
 package com.raraujo.phonemanagementapi.phonerecord;
 
+import com.raraujo.numbervalidationservice.PhoneNumberValidator;
+import com.raraujo.numbervalidationservice.apnv.APNValidator;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +15,9 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
 
   @Autowired
   private PhoneRecordRepository phoneRecordRepository;
+
+
+  private final PhoneNumberValidator phoneNumberValidator = new APNValidator();
 
   @Override
   public List<PhoneRecord> getPhoneRecords() {
@@ -29,10 +35,14 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
   }
 
   @Override
-  public void addPhoneRecord( PhoneRecord phoneRecord ) {
-    // TODO: what if the insert fails? Error validation...
-    phoneRecordRepository.save( phoneRecord );
+  public boolean addPhoneRecord( PhoneRecord phoneRecord ) {
+    if ( !phoneNumberValidator.isPhoneNumberValid( phoneRecord.getPhoneNumber() ) ) {
+      return false;
+    }
+    PhoneRecord savedRecord = phoneRecordRepository.save( phoneRecord );
+    return phoneRecordRepository.existsById( savedRecord.getId() );
   }
+
 
   @Override
   public boolean deletePhoneRecord( Long phoneRecordId ) {
@@ -44,6 +54,7 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
   }
 
   @Override
+  @Transactional
   public void updatePhoneRecord( PhoneRecord phoneRecord ) {
 
   }
