@@ -15,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class PhoneManagementServiceIT {
+public class PhoneManagementServiceGetByIdIT {
 
   @Autowired
   private MockMvc mockMvc;
@@ -48,26 +46,13 @@ public class PhoneManagementServiceIT {
   }
 
   @Test
-  @DisplayName( "PhoneManagementService should store a PhoneRecord" )
-  void testPhoneRecordServiceShouldStoreAPhoneRecord() throws Exception {
-    mockMvc.perform( post( "/api/v1/phonerecords" )
-             .contentType( MediaType.APPLICATION_JSON )
-             .content( "{\"name\":\"John Doe\", \"phoneNumber\":\"123456789\"}" ) )
-           .andExpect( status().isCreated() );
-  }
-
-  @Test
-  @DisplayName( "PhoneManagementService should return all PhoneRecords" )
-  void testPhoneRecordServiceShouldReturnAllPhoneRecords() throws Exception {
-    mockMvc.perform( get( "/api/v1/phonerecords" )
+  @DisplayName( "PhoneManagementService should return a PhoneRecord by ID" )
+  void testPhoneRecordServiceShouldReturnPhoneRecords() throws Exception {
+    int id = 1;
+    mockMvc.perform( get( "/api/v1/phonerecords/{id}", id )
              .contentType( MediaType.APPLICATION_JSON ) )
            .andExpect( status().isOk() )
-           .andExpect( jsonPath( "$", hasSize( 3 ) ) )
-           .andExpect( jsonPath( "$[0].name" ).value( "John Doe" ) )
-           .andExpect( jsonPath( "$[0].phoneNumber" ).value( "123456789" ) )
-           .andExpect( jsonPath( "$[1].name" ).value( "Jane Doe" ) )
-           .andExpect( jsonPath( "$[1].phoneNumber" ).value( "987654321" ) )
-           .andExpect( jsonPath( "$[2].name" ).value( "Adam Something" ) )
-           .andExpect( jsonPath( "$[2].phoneNumber" ).value( "543216789" ) );
+           .andExpect( jsonPath( "$.name" ).value( "John Doe" ) )
+           .andExpect( jsonPath( "$.phoneNumber" ).value( "123456789" ) );
   }
 }
