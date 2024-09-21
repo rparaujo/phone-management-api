@@ -3,16 +3,17 @@ package com.raraujo.phonemanagementapi.phonerecord;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class PhoneRecordServiceImpl implements PhoneRecordService{
+
+    private final List<PhoneRecord> phoneRecords = new ArrayList<>();
+
     @Override
     public List<PhoneRecord> getPhoneRecords() {
-        return List.of(
-                PhoneRecord.builder().name("Joe").phoneNumber("123").build(),
-                PhoneRecord.builder().name("Matt").phoneNumber("456").build()
-        );
+        return phoneRecords;
     }
 
     @Override
@@ -22,7 +23,7 @@ public class PhoneRecordServiceImpl implements PhoneRecordService{
 
     @Override
     public void addPhoneRecord(PhoneRecord phoneRecord) {
-
+        phoneRecords.add(phoneRecord);
     }
 
     @Override

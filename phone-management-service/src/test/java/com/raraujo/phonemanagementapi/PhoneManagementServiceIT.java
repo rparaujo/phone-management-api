@@ -12,7 +12,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class) // Extending to use JUnit5
@@ -28,7 +30,13 @@ public class PhoneManagementServiceIT {
     @Test
     @DisplayName("PhoneRecord Service should return PhoneRecords")
     void testPhoneRecordServiceShouldReturnSomePhoneRecords() {
+        PhoneRecord phoneRecord = PhoneRecord
+                .builder()
+                .name("Joe")
+                .phoneNumber("123")
+                .build();
+        phoneRecordService.addPhoneRecord(phoneRecord);
         final List<PhoneRecord> phoneRecords = phoneRecordService.getPhoneRecords();
-        assertFalse(phoneRecords.isEmpty());
+        assertEquals(1, phoneRecords.size());
     }
 }
