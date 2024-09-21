@@ -43,12 +43,21 @@ public class PhoneManagementServiceGetByIdIT {
 
   @Test
   @DisplayName( "PhoneManagementService should return a PhoneRecord by ID" )
-  void testPhoneRecordServiceShouldReturnPhoneRecords() throws Exception {
+  void testPhoneRecordServiceShouldReturnPhoneRecordById() throws Exception {
     int id = 1;
     mockMvc.perform( get( "/api/v1/phonerecords/{id}", id )
              .contentType( MediaType.APPLICATION_JSON ) )
            .andExpect( status().isOk() )
            .andExpect( jsonPath( "$.name" ).value( "John Doe" ) )
            .andExpect( jsonPath( "$.phoneNumber" ).value( "123456789" ) );
+  }
+
+  @Test
+  @DisplayName( "PhoneManagementService should return 404 a when trying to get a non existing PhoneRecord by ID" )
+  void testPhoneRecordServiceShouldReturn404WhenGettingANonExistingPhoneRecord() throws Exception {
+    int id = 9999;
+    mockMvc.perform( get( "/api/v1/phonerecords/{id}", id )
+             .contentType( MediaType.APPLICATION_JSON ) )
+           .andExpect( status().isNotFound() );
   }
 }
