@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
 import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
@@ -31,9 +35,19 @@ public class PhoneRecordController {
   @Autowired
   private PhoneRecordService phoneRecordService;
 
-  @GetMapping
+  @GetMapping( "/all" )
   public ResponseEntity<List<PhoneRecord>> getPhoneRecords() {
     List<PhoneRecord> records = phoneRecordService.getPhoneRecords().orElse( Collections.emptyList() );
+    if ( records.isEmpty() ) {
+      return ResponseEntity.status( HttpStatus.BAD_REQUEST ).build();
+    }
+    return ResponseEntity.ok( records );
+  }
+
+  @GetMapping
+  public ResponseEntity<Page<PhoneRecord>> getPageablePhoneRecords( @RequestParam( defaultValue = "0" ) int page, @RequestParam( defaultValue = "10" ) int size ) {
+    Pageable pageable = PageRequest.of( page, size );
+    Page<PhoneRecord> records = phoneRecordService.getPaginatedPhoneRecords( pageable ).orElse( Page.empty() );
     if ( records.isEmpty() ) {
       return ResponseEntity.status( HttpStatus.BAD_REQUEST ).build();
     }
@@ -55,7 +69,7 @@ public class PhoneRecordController {
   }
 
   @DeleteMapping( "/{id}" )
-  public ResponseEntity<Void> deletePhoneRecord( @PathVariable Long id ) {
+  public ResponseEntity<Void> deletePhoneRecordById( @PathVariable Long id ) {
     boolean deleted = phoneRecordService.deletePhoneRecord( id );
     if ( deleted ) {
       return ResponseEntity.noContent().build();
@@ -65,7 +79,7 @@ public class PhoneRecordController {
   }
 
   @PutMapping( "/{id}" )
-  public ResponseEntity<Void> updatePhoneRecord( @PathVariable Long id, @RequestBody Map<String, String> phoneRecordMap ) {
+  public ResponseEntity<Void> updatePhoneRecordById( @PathVariable Long id, @RequestBody Map<String, String> phoneRecordMap ) {
     PhoneRecord phoneRecord = mapper.convertValue( phoneRecordMap, PhoneRecord.class );
     phoneRecord.setId( id );
 

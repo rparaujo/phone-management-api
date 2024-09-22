@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -91,7 +94,7 @@ public class PhoneManagementServiceTest {
 
     phoneRecordService.addPhoneRecords( records );
 
-    mockMvc.perform( get( "/api/v1/phonerecords" )
+    mockMvc.perform( get( "/api/v1/phonerecords/all" )
              .contentType( MediaType.APPLICATION_JSON ) )
            .andExpect( status().isOk() )
            .andExpect( jsonPath( "$", hasSize( 3 ) ) )
@@ -101,5 +104,41 @@ public class PhoneManagementServiceTest {
            .andExpect( jsonPath( "$[1].phoneNumber" ).value( "2025550173" ) )
            .andExpect( jsonPath( "$[2].name" ).value( "Adam Something" ) )
            .andExpect( jsonPath( "$[2].phoneNumber" ).value( "4155550198" ) );
+  }
+
+  @Test
+  @DisplayName( "PhoneManagementService should return paginated PhoneRecords" )
+  void testPhoneRecordServiceShouldReturnPaginatedPhoneRecords() throws Exception {
+    List<PhoneRecord> records = List.of(
+      PhoneRecord.builder().name( "John Doe" ).phoneNumber( "4155551234" ).build(),
+      PhoneRecord.builder().name( "Jane Doe" ).phoneNumber( "2025550173" ).build(),
+      PhoneRecord.builder().name( "Adam Something" ).phoneNumber( "4155550198" ).build()
+    );
+
+    List<PhoneRecord> returnedRecords = List.of(
+      PhoneRecord.builder().name( "John Doe" ).phoneNumber( "4155551234" ).build(),
+      PhoneRecord.builder().name( "Jane Doe" ).phoneNumber( "2025550173" ).build()
+    );
+
+    // Create a Page object for pagination
+    Page<PhoneRecord> pagedResponse = new PageImpl<>( returnedRecords );
+
+    when( phoneNumberValidator.isPhoneNumberValid( anyString() ) ).thenReturn( true );
+    when( phoneRecordRepository.save( any() ) ).thenReturn( records.get( 0 ) );
+    when( phoneRecordRepository.existsById( 1L ) ).thenReturn( true );
+    when( phoneRecordRepository.existsById( 2L ) ).thenReturn( true );
+    when( phoneRecordRepository.existsById( 3L ) ).thenReturn( true );
+    when( phoneRecordRepository.findAll( any( Pageable.class ) ) ).thenReturn( pagedResponse );
+
+    phoneRecordService.addPhoneRecords( records );
+
+    mockMvc.perform( get( "/api/v1/phonerecords?page=0&size=3" )
+             .contentType( MediaType.APPLICATION_JSON ) )
+           .andExpect( status().isOk() )
+           .andExpect( jsonPath( "$.content", hasSize( 2 ) ) ) // Change to $.content to reflect Page structure
+           .andExpect( jsonPath( "$.content[0].name" ).value( "John Doe" ) )
+           .andExpect( jsonPath( "$.content[0].phoneNumber" ).value( "4155551234" ) )
+           .andExpect( jsonPath( "$.content[1].name" ).value( "Jane Doe" ) )
+           .andExpect( jsonPath( "$.content[1].phoneNumber" ).value( "2025550173" ) );
   }
 }

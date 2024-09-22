@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +30,22 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
     this.phoneRecordRepository = phoneRecordRepository;
   }
 
-
   @Override
   public Optional<List<PhoneRecord>> getPhoneRecords() {
     try {
       return Optional.of( phoneRecordRepository.findAll() );
     } catch ( Exception ex ) {
       logger.error( "Failed to get all records: " + ex.getMessage() );
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public Optional<Page<PhoneRecord>> getPaginatedPhoneRecords( Pageable pageable ) {
+    try {
+      return Optional.of( phoneRecordRepository.findAll( pageable ) );
+    } catch ( Exception ex ) {
+      logger.error( "Failed to get pageable records: " + ex.getMessage() );
       return Optional.empty();
     }
   }
