@@ -1,9 +1,11 @@
 package com.raraujo.numbervalidationservice.apnv;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.raraujo.numbervalidationservice.PhoneNumberValidator;
 import com.raraujo.numbervalidationservice.apnv.model.APNVResponse;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URI;
@@ -11,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+@Component
 public class APNValidator implements PhoneNumberValidator {
 
   private final HttpClient httpClient = HttpClient.newBuilder()
@@ -20,6 +23,9 @@ public class APNValidator implements PhoneNumberValidator {
   @Override
   public boolean isPhoneNumberValid( String phoneNumber ) {
     String apikey = System.getenv( "PHONE_VALIDATION_SERVICE_API_KEY" );
+    if ( apikey == null ) {
+      throw new IllegalArgumentException( "Cannot read PHONE_VALIDATION_SERVICE_API_KEY env value" );
+    }
     String url = "https://phonevalidation.abstractapi.com/v1/?api_key=" + apikey + "&phone=" + phoneNumber;
     ObjectMapper mapper = new ObjectMapper();
 
@@ -30,6 +36,9 @@ public class APNValidator implements PhoneNumberValidator {
       if ( response.contains( "\"error\"" ) ) {
       } else {
         validationResponse = mapper.readValue( response, APNVResponse.class );
+        if ( validationResponse == null ) {
+          throw new JsonMappingException( "Failed to map JSON to object for class: " + APNVResponse.class.getName() + " With value: " + response );
+        }
       }
     } catch ( JsonProcessingException e ) {
       throw new RuntimeException( e );

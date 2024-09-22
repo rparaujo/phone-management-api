@@ -1,7 +1,6 @@
 package com.raraujo.phonemanagementapi.phonerecord;
 
 import com.raraujo.numbervalidationservice.PhoneNumberValidator;
-import com.raraujo.numbervalidationservice.apnv.APNValidator;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,13 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
   private PhoneRecordRepository phoneRecordRepository;
 
 
-  private final PhoneNumberValidator phoneNumberValidator = new APNValidator();
+  private final PhoneNumberValidator phoneNumberValidator;
+
+  @Autowired
+  public PhoneRecordServiceImpl( PhoneNumberValidator phoneNumberValidator ) {
+    this.phoneNumberValidator = phoneNumberValidator;
+  }
+
 
   @Override
   public List<PhoneRecord> getPhoneRecords() {
