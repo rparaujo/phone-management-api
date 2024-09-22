@@ -51,7 +51,7 @@ public class PhoneManagementServiceGetByIdTest {
   @DisplayName( "PhoneManagementService should return a PhoneRecord by ID" )
   void testPhoneRecordServiceShouldReturnPhoneRecordById() throws Exception {
     Long id = 1L;
-    PhoneRecord record = PhoneRecord.builder().name( "John Doe" ).phoneNumber( "4155551234" ).build();
+    PhoneRecord record = PhoneRecord.builder().id( id ).name( "John Doe" ).phoneNumber( "4155551234" ).build();
     when( phoneNumberValidator.isPhoneNumberValid( anyString() ) ).thenReturn( true );
     when( phoneRecordRepository.save( any() ) ).thenReturn( record );
     when( phoneRecordRepository.findById( id ) ).thenReturn( Optional.of( record ) );
@@ -61,6 +61,7 @@ public class PhoneManagementServiceGetByIdTest {
     mockMvc.perform( get( "/api/v1/phonerecords/{id}", id )
              .contentType( MediaType.APPLICATION_JSON ) )
            .andExpect( status().isOk() )
+           .andExpect( jsonPath( "$.id" ).value( Long.toString( id ) ) )
            .andExpect( jsonPath( "$.name" ).value( "John Doe" ) )
            .andExpect( jsonPath( "$.phoneNumber" ).value( "4155551234" ) );
   }

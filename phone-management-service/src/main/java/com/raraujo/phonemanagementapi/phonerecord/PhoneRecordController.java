@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,23 +37,42 @@ public class PhoneRecordController {
   private PhoneRecordService phoneRecordService;
 
   @GetMapping( "/all" )
-  public ResponseEntity<List<PhoneRecord>> getPhoneRecords() {
+  public ResponseEntity<Map<String, Object>> getPhoneRecords() {
     List<PhoneRecord> records = phoneRecordService.getPhoneRecords().orElse( Collections.emptyList() );
     if ( records.isEmpty() ) {
       return ResponseEntity.status( HttpStatus.BAD_REQUEST ).build();
     }
-    return ResponseEntity.ok( records );
+
+    // Create the custom response
+    Map<String, Object> response = new HashMap<>();
+    response.put( "total", records.size() );
+    response.put( "records", records );
+
+    return ResponseEntity.ok( response );
   }
 
   @GetMapping
-  public ResponseEntity<Page<PhoneRecord>> getPageablePhoneRecords( @RequestParam( defaultValue = "0" ) int page, @RequestParam( defaultValue = "10" ) int size ) {
+  public ResponseEntity<Map<String, Object>> getPageablePhoneRecords(
+    @RequestParam( defaultValue = "0" ) int page,
+    @RequestParam( defaultValue = "10" ) int size ) {
+
     Pageable pageable = PageRequest.of( page, size );
     Page<PhoneRecord> records = phoneRecordService.getPaginatedPhoneRecords( pageable ).orElse( Page.empty() );
+
     if ( records.isEmpty() ) {
       return ResponseEntity.status( HttpStatus.BAD_REQUEST ).build();
     }
-    return ResponseEntity.ok( records );
+
+    // Create the custom response
+    Map<String, Object> response = new HashMap<>();
+    response.put( "total", records.getTotalElements() );
+    response.put( "page", records.getNumber() );
+    response.put( "limit", records.getSize() );
+    response.put( "records", records.getContent() );
+
+    return ResponseEntity.ok( response );
   }
+
 
   @GetMapping( "/{id}" )
   public ResponseEntity<Object> getPhoneRecordById( @PathVariable( "id" ) @Positive( message = "Id must be a positive number" ) Long phoneRecordId ) {
@@ -62,10 +82,14 @@ public class PhoneRecordController {
   }
 
   @PostMapping
-  public ResponseEntity<String> addPhoneRecord( @RequestBody Map<String, String> phoneRecordMap ) {
+  public ResponseEntity<Object> addPhoneRecord( @RequestBody Map<String, String> phoneRecordMap ) {
     PhoneRecord phoneRecord = mapper.convertValue( phoneRecordMap, PhoneRecord.class );
-    return phoneRecordService.addPhoneRecord( phoneRecord ) ? ResponseEntity.status( HttpStatus.CREATED ).build()
-      : ResponseEntity.status( HttpStatus.BAD_REQUEST ).contentType( MediaType.APPLICATION_JSON ).body( "{\"error\":\"invalid phone number\"}" );
+    Optional<PhoneRecord> record = phoneRecordService.addPhoneRecord( phoneRecord );
+
+    return record.<ResponseEntity<Object>>map( value -> ResponseEntity.status( HttpStatus.CREATED ).body( value ) )
+                 .orElseGet( () -> ResponseEntity.status( HttpStatus.BAD_REQUEST )
+                                                 .contentType( MediaType.APPLICATION_JSON )
+                                                 .body( "{\"error\":\"invalid phone number\"}" ) );
   }
 
   @DeleteMapping( "/{id}" )

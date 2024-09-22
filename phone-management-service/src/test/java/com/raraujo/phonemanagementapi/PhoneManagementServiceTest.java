@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -61,7 +60,7 @@ public class PhoneManagementServiceTest {
 
     mockMvc.perform( post( "/api/v1/phonerecords" )
              .contentType( MediaType.APPLICATION_JSON )
-             .content( "{\"name\":\"John Doe\", \"phoneNumber\":\"4155551234\"}" ) )
+             .content( "{\"id\":\"1\",\"name\":\"John Doe\", \"phoneNumber\":\"4155551234\"}" ) )
            .andExpect( status().isCreated() );
   }
 
@@ -97,13 +96,13 @@ public class PhoneManagementServiceTest {
     mockMvc.perform( get( "/api/v1/phonerecords/all" )
              .contentType( MediaType.APPLICATION_JSON ) )
            .andExpect( status().isOk() )
-           .andExpect( jsonPath( "$", hasSize( 3 ) ) )
-           .andExpect( jsonPath( "$[0].name" ).value( "John Doe" ) )
-           .andExpect( jsonPath( "$[0].phoneNumber" ).value( "4155551234" ) )
-           .andExpect( jsonPath( "$[1].name" ).value( "Jane Doe" ) )
-           .andExpect( jsonPath( "$[1].phoneNumber" ).value( "2025550173" ) )
-           .andExpect( jsonPath( "$[2].name" ).value( "Adam Something" ) )
-           .andExpect( jsonPath( "$[2].phoneNumber" ).value( "4155550198" ) );
+           .andExpect( jsonPath( "$.total" ).value( 3 ) )
+           .andExpect( jsonPath( "$.records[0].name" ).value( "John Doe" ) )
+           .andExpect( jsonPath( "$.records[0].phoneNumber" ).value( "4155551234" ) )
+           .andExpect( jsonPath( "$.records[1].name" ).value( "Jane Doe" ) )
+           .andExpect( jsonPath( "$.records[1].phoneNumber" ).value( "2025550173" ) )
+           .andExpect( jsonPath( "$.records[2].name" ).value( "Adam Something" ) )
+           .andExpect( jsonPath( "$.records[2].phoneNumber" ).value( "4155550198" ) );
   }
 
   @Test
@@ -132,13 +131,15 @@ public class PhoneManagementServiceTest {
 
     phoneRecordService.addPhoneRecords( records );
 
-    mockMvc.perform( get( "/api/v1/phonerecords?page=0&size=3" )
+    mockMvc.perform( get( "/api/v1/phonerecords?page=0&size=2" )
              .contentType( MediaType.APPLICATION_JSON ) )
            .andExpect( status().isOk() )
-           .andExpect( jsonPath( "$.content", hasSize( 2 ) ) ) // Change to $.content to reflect Page structure
-           .andExpect( jsonPath( "$.content[0].name" ).value( "John Doe" ) )
-           .andExpect( jsonPath( "$.content[0].phoneNumber" ).value( "4155551234" ) )
-           .andExpect( jsonPath( "$.content[1].name" ).value( "Jane Doe" ) )
-           .andExpect( jsonPath( "$.content[1].phoneNumber" ).value( "2025550173" ) );
+           .andExpect( jsonPath( "$.total" ).value( 2 ) )
+           .andExpect( jsonPath( "$.page" ).value( 0 ) )
+           .andExpect( jsonPath( "$.limit" ).value( 2 ) )
+           .andExpect( jsonPath( "$.records[0].name" ).value( "John Doe" ) )
+           .andExpect( jsonPath( "$.records[0].phoneNumber" ).value( "4155551234" ) )
+           .andExpect( jsonPath( "$.records[1].name" ).value( "Jane Doe" ) )
+           .andExpect( jsonPath( "$.records[1].phoneNumber" ).value( "2025550173" ) );
   }
 }

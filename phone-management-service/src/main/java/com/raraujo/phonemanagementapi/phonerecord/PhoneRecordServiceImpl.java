@@ -66,16 +66,15 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
   }
 
   @Override
-  public boolean addPhoneRecord( PhoneRecord phoneRecord ) {
+  public Optional<PhoneRecord> addPhoneRecord( PhoneRecord phoneRecord ) {
     try {
       if ( !phoneNumberValidator.isPhoneNumberValid( phoneRecord.getPhoneNumber() ) ) {
-        return false;
+        return Optional.empty();
       }
-      PhoneRecord savedRecord = phoneRecordRepository.save( phoneRecord );
-      return phoneRecordRepository.existsById( savedRecord.getId() );
+      return Optional.of( phoneRecordRepository.save( phoneRecord ) );
     } catch ( Exception ex ) {
       logger.error( "Failed to add phone record: " + ex.getMessage() );
-      return false;
+      return Optional.empty();
     }
   }
 
