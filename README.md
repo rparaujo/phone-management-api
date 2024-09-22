@@ -19,6 +19,7 @@ How to run:
 
 - Start the MySQL Docker container with `docker-compose up -d`
 - run: `./run.sh` to start the _phone-management-service_ Spring App
+- You can use the `./curls.sh` script to exercise the app. It contains cURL commands for the basic operations.
 
 How to test:
 
