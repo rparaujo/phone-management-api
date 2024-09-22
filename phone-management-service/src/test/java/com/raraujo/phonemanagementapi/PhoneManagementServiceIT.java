@@ -1,20 +1,29 @@
 package com.raraujo.phonemanagementapi;
 
 
-import com.raraujo.phonemanagementapi.phonerecord.PhoneRecordService;
+import com.raraujo.numbervalidationservice.PhoneNumberValidator;
+import com.raraujo.phonemanagementapi.phonerecord.PhoneRecordServiceImpl;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,28 +32,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ExtendWith( MockitoExtension.class )
 public class PhoneManagementServiceIT {
+
+  @MockBean
+  private PhoneNumberValidator phoneNumberValidator;
 
   @Autowired
   private MockMvc mockMvc;
 
   @Autowired
-  private PhoneRecordService phoneRecordService;
+  @InjectMocks
+  private PhoneRecordServiceImpl phoneRecordService;
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
   @BeforeEach
   void sleep() throws InterruptedException {
-    // We need to sleep so that we do not exceed external API requests per second
-    Thread.sleep( 1000 );
-
-    jdbcTemplate.execute( "ALTER TABLE phone_record AUTO_INCREMENT = 1" );
+    jdbcTemplate.execute( "ALTER TABLE phone_record AUTO_INCREMENT = 1" ); // Reset DB auto increment
   }
 
   @Test
   @DisplayName( "PhoneManagementService should store a valid PhoneRecord" )
   void testPhoneRecordServiceShouldStoreAPhoneRecord() throws Exception {
+    when( phoneNumberValidator.isPhoneNumberValid( anyString() ) ).thenReturn( true );
     mockMvc.perform( post( "/api/v1/phonerecords" )
              .contentType( MediaType.APPLICATION_JSON )
              .content( "{\"name\":\"John Doe\", \"phoneNumber\":\"4155551234\"}" ) )
@@ -54,6 +66,7 @@ public class PhoneManagementServiceIT {
   @Test
   @DisplayName( "PhoneManagementService should not store an invalid PhoneRecord" )
   void testPhoneRecordServiceShouldNotStoreAnInvalidPhoneRecord() throws Exception {
+    when( phoneNumberValidator.isPhoneNumberValid( anyString() ) ).thenReturn( false );
     mockMvc.perform( post( "/api/v1/phonerecords" )
              .contentType( MediaType.APPLICATION_JSON )
              .content( "{\"name\":\"Fake User\", \"phoneNumber\":\"123456789\"}" ) )
@@ -64,14 +77,12 @@ public class PhoneManagementServiceIT {
   @Test
   @DisplayName( "PhoneManagementService should return all PhoneRecords" )
   void testPhoneRecordServiceShouldReturnAllPhoneRecords() throws Exception {
-    phoneRecordService.addPhoneRecord( PhoneRecord.builder().name( "John Doe" ).phoneNumber( "4155551234" ).build() );
-    Thread.sleep( 1000 );
-
-    phoneRecordService.addPhoneRecord( PhoneRecord.builder().name( "Jane Doe" ).phoneNumber( "2025550173" ).build() );
-    Thread.sleep( 1000 );
-
-    phoneRecordService.addPhoneRecord( PhoneRecord.builder().name( "Adam Something" ).phoneNumber( "4155550198" ).build() );
-    Thread.sleep( 1000 );
+    when( phoneNumberValidator.isPhoneNumberValid( anyString() ) ).thenReturn( true );
+    phoneRecordService.addPhoneRecords( List.of(
+      PhoneRecord.builder().name( "John Doe" ).phoneNumber( "4155551234" ).build(),
+      PhoneRecord.builder().name( "Jane Doe" ).phoneNumber( "2025550173" ).build(),
+      PhoneRecord.builder().name( "Adam Something" ).phoneNumber( "4155550198" ).build()
+    ) );
 
     mockMvc.perform( get( "/api/v1/phonerecords" )
              .contentType( MediaType.APPLICATION_JSON ) )
