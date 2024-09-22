@@ -8,8 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PhoneNumberValidatorIT {
-
-
   @BeforeEach
   void sleep() throws InterruptedException {
     // We need to sleep so that we do not exceed external API requests per second

@@ -33,8 +33,13 @@ import java.util.Optional;
 public class PhoneRecordController {
 
   private final ObjectMapper mapper = new ObjectMapper();
+
+  private final PhoneRecordService phoneRecordService;
+
   @Autowired
-  private PhoneRecordService phoneRecordService;
+  public PhoneRecordController( PhoneRecordService phoneRecordService ) {
+    this.phoneRecordService = phoneRecordService;
+  }
 
   @GetMapping( "/all" )
   public ResponseEntity<Map<String, Object>> getPhoneRecords() {
