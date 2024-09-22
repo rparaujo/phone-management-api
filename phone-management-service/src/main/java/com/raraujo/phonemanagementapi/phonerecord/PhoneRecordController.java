@@ -61,12 +61,12 @@ public class PhoneRecordController {
     PhoneRecord phoneRecord = mapper.convertValue( phoneRecordMap, PhoneRecord.class );
     phoneRecord.setId( id );
 
-    UpdateStatus status = phoneRecordService.updatePhoneRecord( phoneRecord );
+    OperationStatus status = phoneRecordService.updatePhoneRecord( phoneRecord );
 
     switch ( status ) {
       case NOT_FOUND:
         return ResponseEntity.notFound().build();
-      case UPDATED:
+      case OK:
         return ResponseEntity.ok().build();
     }
     return ResponseEntity.internalServerError().build();

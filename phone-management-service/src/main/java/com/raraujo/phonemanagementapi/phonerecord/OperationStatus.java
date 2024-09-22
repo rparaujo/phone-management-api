@@ -1,7 +1,7 @@
 package com.raraujo.phonemanagementapi.phonerecord;
 
-public enum UpdateStatus {
+public enum OperationStatus {
   NOT_FOUND,
-  UPDATED,
+  OK,
   UNKNOW_ERROR
 }

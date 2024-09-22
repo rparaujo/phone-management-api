@@ -2,6 +2,8 @@ package com.raraujo.phonemanagementapi.phonerecord;
 
 import com.raraujo.numbervalidationservice.PhoneNumberValidator;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import java.util.Optional;
 
 @Service
 public class PhoneRecordServiceImpl implements PhoneRecordService {
+
+  private static final Logger logger = LoggerFactory.getLogger( PhoneRecordServiceImpl.class );
 
   private final PhoneRecordRepository phoneRecordRepository;
 
@@ -27,12 +31,22 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
 
   @Override
   public List<PhoneRecord> getPhoneRecords() {
-    return phoneRecordRepository.findAll();
+    try {
+      return phoneRecordRepository.findAll();
+    } catch ( Exception ex ) {
+      logger.error( "Failed to get all records: " + ex.getMessage() );
+      return List.of();
+    }
   }
 
   @Override
   public Optional<PhoneRecord> getPhoneRecord( Long phoneRecordId ) {
-    return phoneRecordRepository.findById( phoneRecordId );
+    try {
+      return phoneRecordRepository.findById( phoneRecordId );
+    } catch ( Exception ex ) {
+      logger.error( "Failed to get record with id : " + phoneRecordId + " Message: " + ex.getMessage() );
+      return Optional.empty();
+    }
   }
 
   @Override
@@ -42,36 +56,46 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
 
   @Override
   public boolean addPhoneRecord( PhoneRecord phoneRecord ) {
-    if ( !phoneNumberValidator.isPhoneNumberValid( phoneRecord.getPhoneNumber() ) ) {
+    try {
+      if ( !phoneNumberValidator.isPhoneNumberValid( phoneRecord.getPhoneNumber() ) ) {
+        return false;
+      }
+      PhoneRecord savedRecord = phoneRecordRepository.save( phoneRecord );
+      return phoneRecordRepository.existsById( savedRecord.getId() );
+    } catch ( Exception ex ) {
+      logger.error( "Failed to add phone record: " + ex.getMessage() );
       return false;
     }
-    PhoneRecord savedRecord = phoneRecordRepository.save( phoneRecord );
-    return phoneRecordRepository.existsById( savedRecord.getId() );
   }
 
   @Override
   public boolean deletePhoneRecord( Long phoneRecordId ) {
-    if ( !phoneRecordRepository.existsById( phoneRecordId ) ) {
+    try {
+      if ( !phoneRecordRepository.existsById( phoneRecordId ) ) {
+        return false;
+      }
+      phoneRecordRepository.deleteById( phoneRecordId );
+      return !phoneRecordRepository.existsById( phoneRecordId );
+    } catch ( Exception ex ) {
+      logger.error( "Failed to delete phone record: " + ex.getMessage() );
       return false;
     }
-    phoneRecordRepository.deleteById( phoneRecordId );
-    return !phoneRecordRepository.existsById( phoneRecordId );
   }
 
   @Override
   @Transactional
-  public UpdateStatus updatePhoneRecord( PhoneRecord phoneRecord ) {
+  public OperationStatus updatePhoneRecord( PhoneRecord phoneRecord ) {
     try {
       PhoneRecord record = phoneRecordRepository.findById( phoneRecord.getId() ).orElseThrow(
         () -> new IllegalStateException( "Phone record with id: " + phoneRecord.getId() + " was not found" ) );
       BeanUtils.copyProperties( phoneRecord, record, "id" ); // Exclude 'id' to avoid overwriting
       phoneRecordRepository.save( record ); // Ensure the record is saved
     } catch ( IllegalStateException ex ) {
-      return UpdateStatus.NOT_FOUND;
-    } catch ( Exception e ) {
-      // An unexpected error occurred during the update
-      return UpdateStatus.UNKNOW_ERROR;
+      return OperationStatus.NOT_FOUND;
+    } catch ( Exception ex ) {
+      logger.error( "Failed to update phone record: " + ex.getMessage() );
+      return OperationStatus.UNKNOW_ERROR;
     }
-    return UpdateStatus.UPDATED;
+    return OperationStatus.OK;
   }
 }
