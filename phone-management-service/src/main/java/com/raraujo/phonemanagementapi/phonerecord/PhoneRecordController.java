@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping( "api/v1/phonerecords" )
 public class PhoneRecordController {
+
+  private final ObjectMapper mapper = new ObjectMapper();
   @Autowired
   private PhoneRecordService phoneRecordService;
 
@@ -38,12 +41,10 @@ public class PhoneRecordController {
 
   @PostMapping
   public ResponseEntity<String> addPhoneRecord( @RequestBody Map<String, String> phoneRecordMap ) {
-    ObjectMapper mapper = new ObjectMapper();
     PhoneRecord phoneRecord = mapper.convertValue( phoneRecordMap, PhoneRecord.class );
     return phoneRecordService.addPhoneRecord( phoneRecord ) ? ResponseEntity.status( HttpStatus.CREATED ).build()
       : ResponseEntity.status( HttpStatus.BAD_REQUEST ).contentType( MediaType.APPLICATION_JSON ).body( "{\"error\":\"invalid phone number\"}" );
   }
-
 
   @DeleteMapping( "/{id}" )
   public ResponseEntity<Void> deletePhoneRecord( @PathVariable Long id ) {
@@ -53,5 +54,21 @@ public class PhoneRecordController {
     } else {
       return ResponseEntity.notFound().build();
     }
+  }
+
+  @PutMapping( "/{id}" )
+  public ResponseEntity<Void> updatePhoneRecord( @PathVariable Long id, @RequestBody Map<String, String> phoneRecordMap ) {
+    PhoneRecord phoneRecord = mapper.convertValue( phoneRecordMap, PhoneRecord.class );
+    phoneRecord.setId( id );
+
+    UpdateStatus status = phoneRecordService.updatePhoneRecord( phoneRecord );
+
+    switch ( status ) {
+      case NOT_FOUND:
+        return ResponseEntity.notFound().build();
+      case UPDATED:
+        return ResponseEntity.ok().build();
+    }
+    return ResponseEntity.internalServerError().build();
   }
 }

@@ -16,6 +16,6 @@ public interface PhoneRecordService {
 
   boolean deletePhoneRecord( Long phoneRecordId );
 
-  void updatePhoneRecord( PhoneRecord phoneRecord );
+  UpdateStatus updatePhoneRecord( PhoneRecord phoneRecord );
 
 }

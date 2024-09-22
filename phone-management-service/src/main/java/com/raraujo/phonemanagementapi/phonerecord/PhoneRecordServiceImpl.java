@@ -2,6 +2,7 @@ package com.raraujo.phonemanagementapi.phonerecord;
 
 import com.raraujo.numbervalidationservice.PhoneNumberValidator;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,18 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
 
   @Override
   @Transactional
-  public void updatePhoneRecord( PhoneRecord phoneRecord ) {
-
+  public UpdateStatus updatePhoneRecord( PhoneRecord phoneRecord ) {
+    try {
+      PhoneRecord record = phoneRecordRepository.findById( phoneRecord.getId() ).orElseThrow(
+        () -> new IllegalStateException( "Phone record with id: " + phoneRecord.getId() + " was not found" ) );
+      BeanUtils.copyProperties( phoneRecord, record, "id" ); // Exclude 'id' to avoid overwriting
+      phoneRecordRepository.save( record ); // Ensure the record is saved
+    } catch ( IllegalStateException ex ) {
+      return UpdateStatus.NOT_FOUND;
+    } catch ( Exception e ) {
+      // An unexpected error occurred during the update
+      return UpdateStatus.UNKNOW_ERROR;
+    }
+    return UpdateStatus.UPDATED;
   }
 }
