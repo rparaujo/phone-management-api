@@ -13,15 +13,15 @@ import java.util.Optional;
 @Service
 public class PhoneRecordServiceImpl implements PhoneRecordService {
 
-  @Autowired
-  private PhoneRecordRepository phoneRecordRepository;
+  private final PhoneRecordRepository phoneRecordRepository;
 
 
   private final PhoneNumberValidator phoneNumberValidator;
 
   @Autowired
-  public PhoneRecordServiceImpl( PhoneNumberValidator phoneNumberValidator ) {
+  public PhoneRecordServiceImpl( PhoneNumberValidator phoneNumberValidator, PhoneRecordRepository phoneRecordRepository ) {
     this.phoneNumberValidator = phoneNumberValidator;
+    this.phoneRecordRepository = phoneRecordRepository;
   }
 
 
@@ -48,7 +48,6 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
     PhoneRecord savedRecord = phoneRecordRepository.save( phoneRecord );
     return phoneRecordRepository.existsById( savedRecord.getId() );
   }
-
 
   @Override
   public boolean deletePhoneRecord( Long phoneRecordId ) {

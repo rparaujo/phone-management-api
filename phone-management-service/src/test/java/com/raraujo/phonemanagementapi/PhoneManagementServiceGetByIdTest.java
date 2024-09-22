@@ -1,10 +1,9 @@
 package com.raraujo.phonemanagementapi;
 
-
 import com.raraujo.numbervalidationservice.PhoneNumberValidator;
+import com.raraujo.phonemanagementapi.phonerecord.PhoneRecordRepository;
 import com.raraujo.phonemanagementapi.phonerecord.PhoneRecordServiceImpl;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,10 +14,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -27,12 +28,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
+@TestPropertySource( properties = "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration" )
 @ExtendWith( MockitoExtension.class )
-public class PhoneManagementServiceGetByIdIT {
+public class PhoneManagementServiceGetByIdTest {
 
   @MockBean
   private PhoneNumberValidator phoneNumberValidator;
+
+  @MockBean
+  private PhoneRecordRepository phoneRecordRepository;
 
   @Autowired
   private MockMvc mockMvc;
@@ -41,21 +45,17 @@ public class PhoneManagementServiceGetByIdIT {
   @InjectMocks
   private PhoneRecordServiceImpl phoneRecordService;
 
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
-
-  @BeforeEach
-  void sleep() throws InterruptedException {
-    jdbcTemplate.execute( "ALTER TABLE phone_record AUTO_INCREMENT = 1" ); // Reset DB auto increment
-  }
-
   @Test
   @DisplayName( "PhoneManagementService should return a PhoneRecord by ID" )
   void testPhoneRecordServiceShouldReturnPhoneRecordById() throws Exception {
+    Long id = 1L;
+    PhoneRecord record = PhoneRecord.builder().name( "John Doe" ).phoneNumber( "4155551234" ).build();
     when( phoneNumberValidator.isPhoneNumberValid( anyString() ) ).thenReturn( true );
-    phoneRecordService.addPhoneRecord( PhoneRecord.builder().name( "John Doe" ).phoneNumber( "4155551234" ).build() );
+    when( phoneRecordRepository.save( any() ) ).thenReturn( record );
+    when( phoneRecordRepository.findById( id ) ).thenReturn( Optional.of( record ) );
 
-    int id = 1;
+    phoneRecordService.addPhoneRecord( record ); // Add the record to the service
+
     mockMvc.perform( get( "/api/v1/phonerecords/{id}", id )
              .contentType( MediaType.APPLICATION_JSON ) )
            .andExpect( status().isOk() )
@@ -66,7 +66,9 @@ public class PhoneManagementServiceGetByIdIT {
   @Test
   @DisplayName( "PhoneManagementService should return 404 a when trying to get a non existing PhoneRecord by ID" )
   void testPhoneRecordServiceShouldReturn404WhenGettingANonExistingPhoneRecord() throws Exception {
-    int id = 9999;
+    Long id = 9999L;
+    when( phoneRecordRepository.findById( id ) ).thenReturn( Optional.empty() );
+
     mockMvc.perform( get( "/api/v1/phonerecords/{id}", id )
              .contentType( MediaType.APPLICATION_JSON ) )
            .andExpect( status().isNotFound() );

@@ -23,7 +23,10 @@ How to run:
 
 How to test:
 
-- All tests are integration tests between the Management Service, the Validation Service and the DB
+- The `phone-management-service` module has unit tests with mocked dependencies.
+    - Just run `mvn clean test` to execute the test suite.
+- The `phone-number-validation-service` module has integration tests with
+  the [AbstractAPI](https://www.abstractapi.com/) service.
     - To execute the tests just run: `mvn verify -P integration-tests`
 
 Developed environment:
