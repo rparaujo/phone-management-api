@@ -122,6 +122,8 @@ paths:
           description: PhoneRecord not found
         '400':
           description: Invalid input data
+        '500':
+          description: Server Error
 
     delete:
       summary: Delete a PhoneRecord by ID

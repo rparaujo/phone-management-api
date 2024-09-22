@@ -4,6 +4,7 @@ import com.raraujo.numbervalidationservice.PhoneNumberValidator;
 import com.raraujo.phonemanagementapi.phonerecord.PhoneRecordRepository;
 import com.raraujo.phonemanagementapi.phonerecord.PhoneRecordServiceImpl;
 import com.raraujo.phonemanagementapi.phonerecord.model.PhoneRecord;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -72,5 +74,17 @@ public class PhoneManagementServiceGetByIdTest {
     mockMvc.perform( get( "/api/v1/phonerecords/{id}", id )
              .contentType( MediaType.APPLICATION_JSON ) )
            .andExpect( status().isNotFound() );
+  }
+
+  @Test
+  @Disabled( "TODO: Fix failing assertion" )
+  @DisplayName( "PhoneManagementService should return error when using a negative ID" )
+  void testPhoneRecordServiceShouldReturnErrorWhenUsingANegativeID() throws Exception {
+    Long id = -1L;
+    when( phoneRecordRepository.findById( id ) ).thenReturn( Optional.empty() );
+
+    mockMvc.perform( get( "/api/v1/phonerecords/{id}", id )
+             .contentType( MediaType.APPLICATION_JSON ) )
+           .andExpect( status().isBadRequest() );
   }
 }

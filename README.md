@@ -29,8 +29,19 @@ How to test:
   the [AbstractAPI](https://www.abstractapi.com/) service.
     - To execute the tests just run: `mvn verify -P integration-tests`
 
+API:
+
+- You can find the API docs [here](phone-management-service/src/main/resources/openapi/api-spec.yaml)
+- Endpoints are available in `http://localhost:8080/api/v1`
+
 Developed environment:
 
 - System Version: macOS 14.5 (23F79)
 - java 17.0.2 2022-01-18 LTS
 - Docker version 24.0.6, build ed223bc
+
+TODO:
+
+- Improve test cases
+- User input validation
+- Handle concurrent requests

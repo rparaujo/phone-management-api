@@ -30,12 +30,12 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
 
 
   @Override
-  public List<PhoneRecord> getPhoneRecords() {
+  public Optional<List<PhoneRecord>> getPhoneRecords() {
     try {
-      return phoneRecordRepository.findAll();
+      return Optional.of( phoneRecordRepository.findAll() );
     } catch ( Exception ex ) {
       logger.error( "Failed to get all records: " + ex.getMessage() );
-      return List.of();
+      return Optional.empty();
     }
   }
 
