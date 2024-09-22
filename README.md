@@ -18,7 +18,7 @@ mvn clean install
 How to run:
 
 - Start the MySQL Docker container with `docker-compose up -d`
-- TODO run script
+- run: `./run.sh` to start the _phone-management-service_ Spring App
 
 How to test:
 
