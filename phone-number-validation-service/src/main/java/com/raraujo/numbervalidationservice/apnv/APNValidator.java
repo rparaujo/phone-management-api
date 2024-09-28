@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.raraujo.numbervalidationservice.PhoneNumberValidator;
 import com.raraujo.numbervalidationservice.apnv.model.APNVResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -16,9 +17,12 @@ import java.net.http.HttpResponse;
 @Component
 public class APNValidator implements PhoneNumberValidator {
 
-  private final HttpClient httpClient = HttpClient.newBuilder()
-                                                  .version( HttpClient.Version.HTTP_2 )
-                                                  .build();
+  private final HttpClient httpClient;
+
+  @Autowired
+  public APNValidator( HttpClient httpClient ) {
+    this.httpClient = httpClient;
+  }
 
   @Override
   public boolean isPhoneNumberValid( String phoneNumber ) {

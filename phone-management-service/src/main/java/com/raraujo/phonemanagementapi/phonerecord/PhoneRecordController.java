@@ -27,17 +27,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@RestController
-@RequestMapping( "api/v1/phonerecords" )
-@Validated
+@RestController // combination of @Controller and @ResponseBody. Automatically serialize return values into JSON or XML
+@RequestMapping( "api/v1/phonerecords" ) // used to define a base URL for your controller's endpoints
+@Validated // enforce input validation at class level
 public class PhoneRecordController {
 
   private final ObjectMapper mapper = new ObjectMapper();
 
-  private final PhoneRecordService phoneRecordService;
+  private final PhoneRecordServiceImpl phoneRecordService;
 
   @Autowired
-  public PhoneRecordController( PhoneRecordService phoneRecordService ) {
+  public PhoneRecordController( PhoneRecordServiceImpl phoneRecordService ) {
     this.phoneRecordService = phoneRecordService;
   }
 
@@ -110,9 +110,9 @@ public class PhoneRecordController {
   @PutMapping( "/{id}" )
   public ResponseEntity<Void> updatePhoneRecordById( @PathVariable Long id, @RequestBody Map<String, String> phoneRecordMap ) {
     PhoneRecord phoneRecord = mapper.convertValue( phoneRecordMap, PhoneRecord.class );
-    phoneRecord.setId( id );
+    //phoneRecord.setId( id ); // not available because of @Setter( AccessLevel.NONE ) in model class Note: removed after code review
 
-    OperationStatus status = phoneRecordService.updatePhoneRecord( phoneRecord );
+    OperationStatus status = phoneRecordService.updatePhoneRecord( new PhoneRecord( id, phoneRecord.getName(), phoneRecord.getPhoneNumber() ) ); // Note: using AllArgsConstructor to create a new instance of PhoneRecord
 
     switch ( status ) {
       case NOT_FOUND:

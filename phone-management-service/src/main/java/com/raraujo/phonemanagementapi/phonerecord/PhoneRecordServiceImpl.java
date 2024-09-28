@@ -14,8 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * is a specialization of the @Component annotation that indicates that a class is a service layer component.
+ * is typically used to annotate classes that hold business logic. These classes often interact with repositories to perform operations on the data model.
+ */
 @Service
-public class PhoneRecordServiceImpl implements PhoneRecordService {
+//public class PhoneRecordServiceImpl implements PhoneRecordService {
+public class PhoneRecordServiceImpl {
 
   private static final Logger logger = LoggerFactory.getLogger( PhoneRecordServiceImpl.class );
 
@@ -30,7 +35,7 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
     this.phoneRecordRepository = phoneRecordRepository;
   }
 
-  @Override
+  //  @Override
   public Optional<List<PhoneRecord>> getPhoneRecords() {
     try {
       return Optional.of( phoneRecordRepository.findAll() );
@@ -40,7 +45,7 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
     }
   }
 
-  @Override
+  //  @Override
   public Optional<Page<PhoneRecord>> getPaginatedPhoneRecords( Pageable pageable ) {
     try {
       return Optional.of( phoneRecordRepository.findAll( pageable ) );
@@ -50,7 +55,7 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
     }
   }
 
-  @Override
+  //  @Override
   public Optional<PhoneRecord> getPhoneRecord( Long phoneRecordId ) {
     try {
       return phoneRecordRepository.findById( phoneRecordId );
@@ -60,12 +65,12 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
     }
   }
 
-  @Override
+  //  @Override
   public void addPhoneRecords( List<PhoneRecord> phoneRecords ) {
     phoneRecords.forEach( this::addPhoneRecord );
   }
 
-  @Override
+  //  @Override
   public Optional<PhoneRecord> addPhoneRecord( PhoneRecord phoneRecord ) {
     try {
       if ( !phoneNumberValidator.isPhoneNumberValid( phoneRecord.getPhoneNumber() ) ) {
@@ -78,7 +83,7 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
     }
   }
 
-  @Override
+  //  @Override
   public boolean deletePhoneRecord( Long phoneRecordId ) {
     try {
       if ( !phoneRecordRepository.existsById( phoneRecordId ) ) {
@@ -92,7 +97,13 @@ public class PhoneRecordServiceImpl implements PhoneRecordService {
     }
   }
 
-  @Override
+  //  @Override
+
+  /**
+   * The whole method behaves like a transaction.
+   * If the update fails for some reason the update is reverted and the database is kept in a
+   * consistent state
+   */
   @Transactional
   public OperationStatus updatePhoneRecord( PhoneRecord phoneRecord ) {
     try {

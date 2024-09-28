@@ -8,7 +8,7 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
-@NoArgsConstructor
+@NoArgsConstructor // required by jackson.databind
 @Getter
 @ToString( callSuper = true )
 public class APNVResponse {

@@ -44,6 +44,6 @@ TODO:
 
 - Improve test cases
 - User input validation
-- Handle concurrent requests
+- Handle concurrent requests. Maybe with the Reactive Webflux Spring module?
 - Make `updatePhoneRecord` more RESTfull (i.e. return the updated phone record)
 - Secure Endpoints

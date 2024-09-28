@@ -42,6 +42,7 @@ public class PhoneManagementServiceDeleteByIdTest {
   private PhoneRecordServiceImpl phoneRecordService;
 
   @Test
+  //@WithMockUser // Not working with default spring-security configuration
   @DisplayName( "PhoneManagementService should delete a PhoneRecord by ID" )
   void testPhoneRecordServiceShouldDeleteAPhoneRecordById() throws Exception {
     Long id = 1L;
